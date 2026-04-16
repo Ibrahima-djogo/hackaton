@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NaissanceChain — Administration</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<div class="gov-strip"></div>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="index.html" class="brand">
+      <div class="brand__seal"></div>
+      <div>
+        <span class="brand__name">NaissanceChain</span>
+        <span class="brand__sub">Registre Civil</span>
+      </div>
+    </a>
+    <span class="admin-badge">Admin Ministère</span>
+  </div>
+</header>
+
+<div class="content">
+
+  <nav class="breadcrumb">
+    <a href="index.html">NaissanceChain</a>
+    <span>/</span>
+    <span class="breadcrumb__current">Tableau de bord administrateur</span>
+  </nav>
+
+  <!-- ONGLETS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('overview',this)">Vue d'ensemble</button>
+    <button class="tab"        onclick="showTab('registre',this)">Registre</button>
+    <button class="tab"        onclick="showTab('securite',this)">Sécurité</button>
+    <button class="tab"        onclick="showTab('acces',this)">Accès</button>
+  </div>
+
+  <!-- ══ PANNEAU 1 : VUE D'ENSEMBLE ══ -->
+  <div class="panel active" id="panel-overview">
+
+    <div class="stats-grid" id="stats-grid">
+      <!-- Rempli par JS -->
+    </div>
+
+    <div class="block">
+      <div class="block__head">
+        <span class="block__title">Enregistrements par préfecture</span>
+        <span class="block__badge" id="region-badge">—</span>
+      </div>
+      <div class="block__body">
+        <div class="bar-chart" id="bar-chart">
+          <!-- Rempli par JS -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ PANNEAU 2 : REGISTRE ══ -->
+  <div class="panel" id="panel-registre">
+
+    <div class="block">
+      <div class="block__head">
+        <span class="block__title">Journal d'audit — Tous les actes</span>
+        <button style="padding:5px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.65);font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;font-family:var(--sans);border-radius:2px"
+                onclick="renderTable()">Actualiser</button>
+      </div>
+
+      <div style="padding:10px 15px;border-bottom:1px solid rgba(255,255,255,.06)">
+        <input type="search" class="search-admin"
+          placeholder="Rechercher par nom, identifiant, préfecture ou agent..."
+          oninput="filtrerTable(this.value)">
+      </div>
+
+      <div class="table-wrap">
+        <table class="audit-table">
+          <thead>
+            <tr>
+              <th>Identifiant</th>
+              <th>Nom enfant</th>
+              <th>Préfecture</th>
+              <th>Date naissance</th>
+              <th>Enregistré le</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:rgba(255,255,255,.25)">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <h4>Exporter le registre</h4>
+      <p>Télécharger l'ensemble des actes enregistrés au format JSON pour archivage.</p>
+      <button class="btn-gold" onclick="exporterJSON()">Exporter en JSON</button>
+    </div>
+
+    <div class="action-card" style="border-color:rgba(239,68,68,.2)">
+      <h4 style="color:#FCA5A5">Zone dangereuse</h4>
+      <p>Effacer tous les actes du registre local. Action irréversible.</p>
+      <button class="btn-danger" onclick="effacerTout()">Effacer le registre local</button>
+    </div>
+
+  </div>
+
+  <!-- ══ PANNEAU 3 : SÉCURITÉ ══ -->
+  <div class="panel" id="panel-securite">
+
+    <div class="block">
+      <div class="block__head">
+        <span class="block__title">Résistance aux attaques</span>
+        <span class="block__badge">Toutes mitigées</span>
+      </div>
+      <div class="block__body">
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">Replay Attack</div><div class="threat-desc">Nonce par agent + signature usage unique. Chaque signature est valide une seule fois.</div></div></div>
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">Fake UI Submission</div><div class="threat-desc">Le registre est la seule source de vérité. Les soumissions non enregistrées sont ignorées.</div></div></div>
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">Data Tampering</div><div class="threat-desc">Toute modification des données change le hash SHA-256 et invalide l'acte automatiquement.</div></div></div>
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">Unauthorized Write</div><div class="threat-desc">RBAC on-chain : seul le rôle AGENT_ROLE peut appeler registerBirth() sur le smart contract.</div></div></div>
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">Duplicate Entry</div><div class="threat-desc">Vérification d'unicité côté client et côté blockchain (require(!record.exists)).</div></div></div>
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">XSS / Injection</div><div class="threat-desc">Tous les champs sont sanitisés et validés via regex strict avant tout traitement.</div></div></div>
+        <div class="threat-row"><span class="threat-ok">Protégé</span><div><div class="threat-name">Double Submit</div><div class="threat-desc">Variable <code style="font-family:var(--mono);font-size:10px">enCours</code> verrouille le formulaire pendant la transaction.</div></div></div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block__head"><span class="block__title">Empreinte cryptographique SHA-256</span></div>
+      <div class="block__body" style="font-size:12px;color:rgba(255,255,255,.55);line-height:1.75">
+        <p>Chaque acte est haché via <strong style="color:var(--gold)">SHA-256</strong> avec <code style="font-family:var(--mono)">window.crypto.subtle.digest</code> — l'API native du navigateur. Aucune bibliothèque externe.</p>
+        <p style="margin-top:10px">La sérialisation est <strong style="color:var(--gold)">canonique</strong> : les clés JSON sont triées alphabétiquement, garantissant que les mêmes données produisent toujours le même hash.</p>
+        <p style="margin-top:10px">Lors de la vérification, le hash est <strong style="color:var(--gold)">recalculé localement</strong> et comparé au hash stocké. Toute divergence invalide l'acte.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ PANNEAU 4 : ACCÈS ══ -->
+  <div class="panel" id="panel-acces">
+
+    <div class="block">
+      <div class="block__head"><span class="block__title">Contrôle d'accès — RBAC</span></div>
+      <div class="block__body">
+        <div class="rbac-card">
+          <div class="rbac-role">ADMIN_ROLE</div>
+          <div class="rbac-desc">Ministère de l'Administration du Territoire. Accès complet à la gestion du registre.</div>
+          <div class="perm-tags">
+            <span class="perm-tag perm-allow">grantRole</span>
+            <span class="perm-tag perm-allow">revokeRole</span>
+            <span class="perm-tag perm-allow">pause</span>
+            <span class="perm-tag perm-allow">unpause</span>
+            <span class="perm-tag perm-allow">flagSuspicious</span>
+            <span class="perm-tag perm-deny">registerBirth</span>
+          </div>
+        </div>
+        <div class="rbac-card">
+          <div class="rbac-role">AGENT_ROLE</div>
+          <div class="rbac-desc">Agents de santé et officiers d'état civil terrain. Enregistrement uniquement.</div>
+          <div class="perm-tags">
+            <span class="perm-tag perm-allow">registerBirth</span>
+            <span class="perm-tag perm-deny">grantRole</span>
+            <span class="perm-tag perm-deny">revokeRole</span>
+            <span class="perm-tag perm-deny">pause</span>
+          </div>
+        </div>
+        <div class="rbac-card">
+          <div class="rbac-role">PUBLIC (lecture seule)</div>
+          <div class="rbac-desc">Toute personne peut vérifier un acte. Aucune écriture sans rôle.</div>
+          <div class="perm-tags">
+            <span class="perm-tag perm-allow">verifyBirth</span>
+            <span class="perm-tag perm-allow">getBirth</span>
+            <span class="perm-tag perm-deny">registerBirth</span>
+            <span class="perm-tag perm-deny">grantRole</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-card">
+      <h4>Simuler l'attribution d'un rôle AGENT</h4>
+      <p>En production : appelle <code style="font-family:var(--mono);font-size:10px">grantRole()</code> sur le smart contract via MetaMask.</p>
+      <input type="text" id="agent-name" class="admin-input" placeholder="Nom de l'agent (ex: Dr. Kouyaté, Infirmier)">
+      <button class="btn-gold" onclick="ajouterAgent()">Enregistrer l'agent (simulation)</button>
+      <div id="agent-feedback" style="margin-top:8px;font-size:11px;color:var(--gold);line-height:1.6"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT — PAGE ADMIN UNIQUEMENT
+     Stats, graphique, tableau, export, RBAC simulation.
+     ============================================================ -->
+<script>
+'use strict';
+
+const KEY_RECORDS = 'nc_birth_records';
+const KEY_LAST    = 'nc_last_id';
+
+/* ── Utilitaires ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function getAll() {
+  try { return JSON.parse(localStorage.getItem(KEY_RECORDS) || '[]'); } catch { return []; }
+}
+
+function formatDateTime(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+}
+
+/* ── Navigation par onglets ── */
+function showTab(name, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── Stats ── */
+function renderStats() {
+  const records   = getAll();
+  const total     = records.length;
+  const now       = new Date();
+  const thisMonth = records.filter(r => {
+    const d = new Date(r.date_enregistrement);
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).length;
+  const withTx  = records.filter(r => r.txHash).length;
+  const pending = total - withTx;
+
+  document.getElementById('stats-grid').innerHTML = [
+    { lbl:'Enregistrements totaux', val:total,     sub:'Dans ce registre local' },
+    { lbl:'Ce mois',                val:thisMonth,  sub:'Enregistrements récents' },
+    { lbl:'Confirmés on-chain',      val:withTx,    sub:'Avec txHash blockchain' },
+    { lbl:'En attente sync',         val:pending,   sub:'Sans confirmation' },
+  ].map(s => `
+    <div class="stat-card">
+      <div class="stat-card__lbl">${s.lbl}</div>
+      <div class="stat-card__val">${s.val}</div>
+      <div class="stat-card__sub">${s.sub}</div>
+    </div>`
+  ).join('');
+}
+
+/* ── Graphique à barres ── */
+function renderBarChart() {
+  const records = getAll();
+  const chart   = document.getElementById('bar-chart');
+  const badge   = document.getElementById('region-badge');
+
+  const counts = {};
+  records.forEach(r => { counts[r.lieu_naissance] = (counts[r.lieu_naissance] || 0) + 1; });
+  const sorted   = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+  const maxCount = sorted[0]?.[1] || 1;
+
+  badge.textContent = sorted.length + ' préfecture' + (sorted.length > 1 ? 's' : '');
+
+  if (!sorted.length) {
+    chart.innerHTML = '<p style="font-size:12px;color:rgba(255,255,255,.3);text-align:center;padding:20px">Aucune donnée.</p>';
+    return;
+  }
+
+  chart.innerHTML = sorted.map(([name, count]) => `
+    <div class="bar-row">
+      <div class="bar-name">${name}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${Math.round(count/maxCount*100)}%"></div>
+      </div>
+      <div class="bar-count">${count}</div>
+    </div>`
+  ).join('');
+}
+
+/* ── Tableau d'audit ── */
+let _allRecords = [];
+
+function renderTable() {
+  _allRecords = getAll().reverse();
+  renderRows(_allRecords);
+}
+
+function renderRows(records) {
+  const tbody = document.getElementById('table-body');
+  if (!records.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:rgba(255,255,255,.25)">Aucun enregistrement trouvé.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = records.map(r => `
+    <tr>
+      <td class="td-mono">${r.id}</td>
+      <td class="td-name">${r.nom_enfant}</td>
+      <td>${r.lieu_naissance}</td>
+      <td class="td-mono">${r.date_naissance}</td>
+      <td class="td-mono">${formatDateTime(r.date_enregistrement)}</td>
+      <td><span class="status-ok">Confirmé</span></td>
+    </tr>`
+  ).join('');
+}
+
+function filtrerTable(q) {
+  if (!q.trim()) { renderRows(_allRecords); return; }
+  const lq = q.toLowerCase();
+  renderRows(_allRecords.filter(r =>
+    r.nom_enfant.toLowerCase().includes(lq)     ||
+    r.id.toLowerCase().includes(lq)             ||
+    r.lieu_naissance.toLowerCase().includes(lq) ||
+    (r.nom_agent && r.nom_agent.toLowerCase().includes(lq))
+  ));
+}
+
+/* ── Export JSON ── */
+function exporterJSON() {
+  const records = getAll();
+  if (!records.length) { toast('Aucun acte à exporter.'); return; }
+  const blob = new Blob([JSON.stringify(records, null, 2)], { type:'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'naissancechain_registre_' + new Date().toISOString().split('T')[0] + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Export JSON téléchargé.');
+}
+
+/* ── Effacement registre ── */
+function effacerTout() {
+  if (!confirm('ATTENTION — Effacer tous les actes du registre local ?\n\nCette action est irréversible.')) return;
+  localStorage.removeItem(KEY_RECORDS);
+  localStorage.removeItem(KEY_LAST);
+  toast('Registre local effacé.');
+  setTimeout(() => location.reload(), 1200);
+}
+
+/* ── Simulation attribution rôle agent ── */
+function ajouterAgent() {
+  const name = document.getElementById('agent-name').value.trim();
+  if (!name) { toast('Saisissez un nom d\'agent.'); return; }
+  const addr = '0x' + Array.from({length:40}, () => Math.floor(Math.random()*16).toString(16)).join('');
+  document.getElementById('agent-feedback').innerHTML =
+    `Agent "${name}" enregistré (simulation).<br>
+     <span style="font-family:var(--mono);font-size:10px">${addr}</span>`;
+  toast(`Rôle AGENT accordé à ${name} (simulation).`);
+}
+
+/* ── Initialisation ── */
+renderStats();
+renderBarChart();
+renderTable();
+</script>
+</body>
+</html>

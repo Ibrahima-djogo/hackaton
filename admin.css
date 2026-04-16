@@ -1,0 +1,129 @@
+    :root {
+      --navy:   #0C1F3F;
+      --navy2:  #163562;
+      --dark:   #060F1F;
+      --gold:   #B8922A;
+      --gold2:  #D4A843;
+      --green:  #1A5C3A;
+      --grn2:   #27AE60;
+      --cream:  #FAF8F4;
+      --white:  #FFFFFF;
+      --slate:  #6B7A8D;
+      --sl2:    #9AA5B4;
+      --border: #D9DDE3;
+      --bord2:  #B8BEC8;
+      --text:   #0C1F3F;
+      --soft:   #4A5568;
+      --sbg:    #EDF7F1;
+      --sbd:    #BEE3CB;
+      --danger: #9B1C1C;
+      --dbg:    #FEF2F2;
+      --dbd:    #FECACA;
+      --serif:  'Cormorant Garamond', serif;
+      --sans:   'DM Sans', sans-serif;
+      --mono:   'DM Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--sans); background: var(--dark); color: white; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+    .gov-strip { background: var(--gold); height: 3px; }
+
+    /* ── Topbar admin ── */
+    .topbar { background: var(--navy); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 20px; }
+    .topbar__inner { max-width: 1000px; margin: 0 auto; height: 56px; display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand__seal { width: 32px; height: 32px; background: rgba(255,255,255,.08); border-radius: 50%; border: 1px solid rgba(255,255,255,.15); position: relative; flex-shrink: 0; }
+    .brand__seal::after { content: ''; position: absolute; width: 11px; height: 11px; background: var(--gold); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .brand__name { font-family: var(--serif); font-size: 17px; font-weight: 700; color: white; display: block; line-height: 1; }
+    .brand__sub  { font-size: 9px; color: rgba(255,255,255,.4); letter-spacing: .09em; text-transform: uppercase; display: block; margin-top: 2px; }
+    .admin-badge { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); background: rgba(184,146,42,.12); border: 1px solid rgba(184,146,42,.3); padding: 4px 12px; border-radius: 2px; }
+
+    /* ── Contenu ── */
+    .content { max-width: 1000px; margin: 0 auto; padding: 24px 20px 60px; }
+
+    /* Breadcrumb */
+    .breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; color: rgba(255,255,255,.35); margin-bottom: 20px; }
+    .breadcrumb __current { color: var(--gold); }
+    .breadcrumb a { color: rgba(255,255,255,.35); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--gold); }
+    .breadcrumb__current { color: var(--gold); }
+
+    /* ── Onglets ── */
+    .tabs { display: flex; gap: 2px; border-bottom: 1px solid rgba(255,255,255,.08); margin-bottom: 20px; }
+    .tab  { padding: 10px 16px; font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; background: transparent; color: rgba(255,255,255,.45); border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: var(--sans); transition: all .15s; }
+    .tab:hover  { color: rgba(255,255,255,.75); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+    /* ── Panneaux ── */
+    .panel        { display: none; }
+    .panel.active { display: block; }
+
+    /* ── Stats ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 18px; }
+    @media (min-width:600px) { .stats-grid { grid-template-columns: repeat(4,1fr); } }
+    .stat-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.06); border-top: 2px solid var(--gold); padding: 16px 14px; }
+    .stat-card__lbl { font-size: 9px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: rgba(255,255,255,.4); margin-bottom: 8px; }
+    .stat-card__val { font-size: 28px; font-weight: 700; color: white; line-height: 1; margin-bottom: 3px; }
+    .stat-card__sub { font-size: 10px; color: rgba(255,255,255,.3); }
+
+    /* ── Bloc interne ── */
+    .block { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+    .block__head { padding: 11px 15px; border-bottom: 1px solid rgba(255,255,255,.06); display: flex; align-items: center; justify-content: space-between; }
+    .block__title { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+    .block__badge { font-size: 9px; font-weight: 700; padding: 3px 8px; background: rgba(184,146,42,.12); border: 1px solid rgba(184,146,42,.25); color: var(--gold); letter-spacing: .06em; }
+    .block__body  { padding: 14px 15px; }
+
+    /* ── Graphique barres ── */
+    .bar-chart   { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row     { display: flex; align-items: center; gap: 10px; }
+    .bar-name    { width: 74px; text-align: right; font-size: 10px; color: rgba(255,255,255,.55); flex-shrink: 0; }
+    .bar-track   { flex: 1; background: rgba(255,255,255,.06); border-radius: 2px; height: 16px; overflow: hidden; }
+    .bar-fill    { height: 100%; background: var(--gold); opacity: .8; border-radius: 2px; transition: width .6s ease; }
+    .bar-count   { width: 36px; font-size: 10px; color: rgba(255,255,255,.4); text-align: right; font-family: var(--mono); flex-shrink: 0; }
+
+    /* ── Tableau ── */
+    .table-wrap { overflow-x: auto; }
+    .audit-table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 560px; }
+    .audit-table th { padding: 9px 12px; text-align: left; font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.35); border-bottom: 1px solid rgba(255,255,255,.08); white-space: nowrap; }
+    .audit-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.04); color: rgba(255,255,255,.65); vertical-align: middle; }
+    .audit-table tr:last-child td { border-bottom: none; }
+    .audit-table tr:hover td { background: rgba(255,255,255,.02); }
+    .td-name { font-family: var(--sans); color: rgba(255,255,255,.85); font-size: 12px; font-weight: 500; }
+    .td-mono { font-family: var(--mono); font-size: 10px; }
+    .status-ok { font-size: 9px; font-weight: 700; padding: 3px 8px; background: rgba(26,92,58,.25); border: 1px solid rgba(46,204,113,.2); color: rgba(46,204,113,.9); letter-spacing: .06em; text-transform: uppercase; font-family: var(--sans); }
+
+    /* ── Recherche ── */
+    .search-admin { width: 100%; padding: 9px 13px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); color: white; font-size: 13px; font-family: var(--sans); border-radius: 2px; }
+    .search-admin:focus { outline: none; border-color: var(--gold); }
+    .search-admin::placeholder { color: rgba(255,255,255,.25); }
+
+    /* ── Cartes d'action ── */
+    .action-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); padding: 16px; margin-bottom: 10px; border-radius: 2px; }
+    .action-card h4 { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.8); margin-bottom: 5px; }
+    .action-card p  { font-size: 11px; color: rgba(255,255,255,.4); margin-bottom: 12px; line-height: 1.5; }
+    .btn-gold   { width: 100%; padding: 11px; background: var(--gold); color: var(--navy); border: none; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; font-family: var(--sans); cursor: pointer; border-radius: 2px; transition: background .15s; }
+    .btn-gold:hover { background: var(--gold2); }
+    .btn-danger { width: 100%; padding: 11px; background: rgba(155,28,28,.3); color: #FCA5A5; border: 1px solid rgba(239,68,68,.3); font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; font-family: var(--sans); cursor: pointer; border-radius: 2px; transition: all .15s; }
+    .btn-danger:hover { background: rgba(155,28,28,.5); }
+    .admin-input { width: 100%; padding: 9px 12px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12); color: white; font-size: 13px; font-family: var(--mono); margin-bottom: 8px; border-radius: 2px; }
+    .admin-input:focus { outline: none; border-color: var(--gold); }
+    .admin-input::placeholder { color: rgba(255,255,255,.25); font-family: var(--sans); }
+
+    /* ── RBAC ── */
+    .rbac-card { background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.06); padding: 14px 15px; margin-bottom: 10px; border-radius: 2px; }
+    .rbac-role { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+    .rbac-desc { font-size: 11px; color: rgba(255,255,255,.5); margin-bottom: 10px; line-height: 1.5; }
+    .perm-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .perm-tag  { font-size: 9px; padding: 3px 8px; font-family: var(--mono); border-radius: 2px; }
+    .perm-allow { background: rgba(26,92,58,.2); border: 1px solid rgba(46,204,113,.2); color: rgba(46,204,113,.8); }
+    .perm-deny  { background: rgba(155,28,28,.15); border: 1px solid rgba(239,68,68,.2); color: rgba(239,68,68,.8); }
+
+    /* ── Sécurité ── */
+    .threat-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 12px; background: rgba(255,255,255,.02); border: 1px solid rgba(255,255,255,.04); margin-bottom: 6px; border-radius: 2px; }
+    .threat-ok  { font-size: 9px; font-weight: 700; padding: 2px 7px; letter-spacing: .06em; text-transform: uppercase; flex-shrink: 0; margin-top: 2px; background: rgba(26,92,58,.2); color: rgba(46,204,113,.9); border-radius: 2px; }
+    .threat-name { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.8); margin-bottom: 2px; }
+    .threat-desc { font-size: 10px; color: rgba(255,255,255,.4); line-height: 1.5; }
+
+    /* ── Toast ── */
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--navy); color: white; padding: 12px 22px; font-size: 13px; font-weight: 500; transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 9999; border-left: 3px solid var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,.5); border-radius: 2px; max-width: 90vw; text-align: center; line-height: 1.4; }
+    .toast.show { transform: translateX(-50%) translateY(0); }

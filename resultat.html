@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NaissanceChain — Acte de Naissance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- ============================================================
+       CSS — PAGE ACTE DE NAISSANCE UNIQUEMENT
+       ============================================================ -->
+  <link rel="stylesheet" href="resultat.css">
+</head>
+<body>
+
+<div class="gov-strip"></div>
+
+<header class="header">
+  <div class="header__inner">
+    <a href="index.html" class="brand">
+      <div class="brand__seal"></div>
+      <div>
+        <span class="brand__name">NaissanceChain</span>
+        <span class="brand__sub">Registre Civil</span>
+      </div>
+    </a>
+    <div id="badge-validite"></div>
+  </div>
+</header>
+
+<main class="main" id="main">
+  <p style="text-align:center;padding:60px 0;color:#6B7A8D">Chargement de l'acte...</p>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT — PAGE ACTE DE NAISSANCE UNIQUEMENT
+     Lit l'ID dans l'URL, affiche le document, génère le QR.
+     ============================================================ -->
+<script>
+'use strict';
+
+const KEY_RECORDS = 'nc_birth_records';
+const KEY_LAST    = 'nc_last_id';
+
+/* ── Utilitaires ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function formatDate(s) {
+  if (!s) return '—';
+  return new Date(s + 'T00:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function formatDateTime(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function getAll() {
+  try { return JSON.parse(localStorage.getItem(KEY_RECORDS) || '[]'); } catch { return []; }
+}
+
+/* ── Icône SVG pour chaque ligne de données ── */
+function svgIcon(path) {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--navy)" stroke-width="1.8" stroke-linecap="round"><path d="${path}"/></svg>`;
+}
+
+/* ── Initialisation ── */
+function init() {
+  const id   = new URLSearchParams(window.location.search).get('id') || localStorage.getItem(KEY_LAST);
+  const acte = id ? getAll().find(r => r.id === id) : null;
+  const main = document.getElementById('main');
+
+  if (!acte) {
+    /* Acte introuvable */
+    document.getElementById('badge-validite').innerHTML = '';
+    main.innerHTML = `
+      <div class="not-found">
+        <div class="not-found__icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </div>
+        <h3 style="font-size:18px;margin-bottom:8px">Acte introuvable</h3>
+        <p style="font-size:13px;color:#6B7A8D;margin-bottom:24px">Aucun acte trouvé pour l'identifiant "${id || 'inconnu'}".</p>
+        <a href="index.html" class="btn-primary" style="max-width:260px;margin:0 auto;display:block">Retour à l'enregistrement</a>
+      </div>`;
+    return;
+  }
+
+  /* Badge de validité dans le header */
+  document.getElementById('badge-validite').innerHTML = `
+    <div class="valid-badge"><div class="valid-dot"></div>Acte valide</div>`;
+
+  /* Rendu du document */
+  main.innerHTML = `
+    <div class="success-bar">
+      <div>
+        <p style="font-size:13px;font-weight:500">Acte de naissance généré avec succès</p>
+        <small style="font-size:11px;opacity:.8">Enregistré dans le registre numérique officiel</small>
+      </div>
+      <div class="success-bar__icon">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+    </div>
+
+    <div class="cert">
+      <!-- En-tête officiel -->
+      <div class="cert-head">
+        <div class="cert-flag">
+          <span style="background:#CE1126"></span>
+          <span style="background:#FCD116"></span>
+          <span style="background:#009460"></span>
+        </div>
+        <div class="cert-country">République de Guinée</div>
+        <div class="cert-title">Acte de Naissance</div>
+        <div class="cert-ministry">Ministère de l'Administration du Territoire et de la Décentralisation</div>
+      </div>
+
+      <!-- Bande dorée -->
+      <div class="gold-band">
+        <span>Document officiel</span><span>NaissanceChain</span><span>Registre numérique</span>
+      </div>
+
+      <!-- ID unique -->
+      <div class="id-row">
+        <div>
+          <div class="id-label">Identifiant unique national</div>
+          <div class="id-value">${acte.id}</div>
+        </div>
+        <button class="copy-btn" onclick="copier('${acte.id}')">Copier</button>
+      </div>
+
+      <!-- Nom de l'enfant -->
+      <div class="name-block">
+        <div class="name-label">Nom de l'enfant</div>
+        <div class="name-value">${acte.nom_enfant}</div>
+      </div>
+
+      <!-- Données -->
+      <div class="data-table">
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M3 4h18v2H3zM3 10h18v2H3zM3 16h18v2H3z')}</div>
+          <div><div class="data-lbl">Date de naissance</div><div class="data-val">${formatDate(acte.date_naissance)}</div></div>
+        </div>
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z M12 7a3 3 0 100 6 3 3 0 000-6z')}</div>
+          <div><div class="data-lbl">Lieu de naissance</div><div class="data-val">${acte.lieu_naissance}, Guinée</div></div>
+        </div>
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 3a4 4 0 100 8 4 4 0 000-8z')}</div>
+          <div><div class="data-lbl">Nom de la mère</div><div class="data-val">${acte.nom_mere}</div></div>
+        </div>
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2 M12 3a4 4 0 100 8 4 4 0 000-8z')}</div>
+          <div><div class="data-lbl">Nom du père</div><div class="data-val">${acte.nom_pere}</div></div>
+        </div>
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z')}</div>
+          <div><div class="data-lbl">Agent enregistreur</div><div class="data-val">${acte.nom_agent}</div></div>
+        </div>
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z M12 6v6l4 2')}</div>
+          <div><div class="data-lbl">Date d'enregistrement</div><div class="data-val">${formatDateTime(acte.date_enregistrement)}</div></div>
+        </div>
+        ${acte.txHash ? `
+        <div class="data-row">
+          <div class="data-icon">${svgIcon('M13 2L3 14h9l-1 8 10-12h-9l1-8z')}</div>
+          <div><div class="data-lbl">Transaction blockchain</div>
+          <div class="data-val" style="font-family:var(--mono);font-size:10px;word-break:break-all">
+            <a href="${acte.explorerUrl||'#'}" target="_blank" style="color:var(--green);text-decoration:none">${acte.txHash}</a>
+          </div></div>
+        </div>` : ''}
+      </div>
+
+      <!-- QR Code -->
+      <div class="qr-section">
+        <div class="qr-title">Code de vérification officiel</div>
+        <div id="qrcode"></div>
+        <p class="qr-caption">Scannez ce code pour vérifier l'authenticité de cet acte</p>
+        <span class="qr-badge">Acte de naissance vérifié numériquement</span>
+      </div>
+
+      <!-- Bande cryptographique -->
+      <div class="crypto-strip">
+        <div class="crypto-lbl">Empreinte cryptographique — Intégrité certifiée</div>
+        <div class="crypto-hash">${acte.hashHex || '—'}</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn-primary" onclick="window.print()">Imprimer l'acte de naissance</button>
+      <div class="btn-grid">
+        <a href="verify.html?id=${acte.id}" class="btn-outline">Vérifier cet acte</a>
+        <a href="index.html" class="btn-outline">Nouvel enregistrement</a>
+      </div>
+    </div>
+    <p class="print-hint">Utilisez Ctrl+P pour imprimer ou enregistrer en PDF.</p>
+  `;
+
+  /* Génération du QR Code */
+  new QRCode(document.getElementById('qrcode'), {
+    text:         JSON.stringify({ id: acte.id, hash: acte.hashHex, txHash: acte.txHash||null }),
+    width: 160, height: 160,
+    colorDark: '#0C1F3F', colorLight: '#FFFFFF',
+    correctLevel: QRCode.CorrectLevel.H,
+  });
+}
+
+function copier(id) {
+  navigator.clipboard.writeText(id).then(() => toast('Identifiant copié.')).catch(() => toast('Copie impossible.'));
+}
+
+init();
+</script>
+</body>
+</html>

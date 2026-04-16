@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NaissanceChain — Enregistrement</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <!-- ============================================================
+       CSS — PAGE ENREGISTREMENT UNIQUEMENT
+       ============================================================ -->
+  <link rel="stylesheet" href="indexapp.css">
+</head>
+<body>
+
+<div class="gov-strip"></div>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header__inner">
+    <a href="index.html" class="brand">
+      <div class="brand__seal"></div>
+      <div>
+        <span class="brand__name">NaissanceChain</span>
+        <span class="brand__sub">Registre Civil</span>
+      </div>
+    </a>
+    <div class="status-pill">
+      <div class="status-dot"></div>
+      Mode hors ligne
+    </div>
+  </div>
+</header>
+
+<!-- BANNIÈRE -->
+<div class="banner">
+  <div class="banner__label">République de Guinée</div>
+  <h1>Enregistrement de Naissance</h1>
+  <p>Direction Nationale de l'État Civil — Registre Numérique Officiel</p>
+</div>
+
+<!-- FORMULAIRE -->
+<main class="main">
+  <div class="notice">
+    Remplissez l'intégralité du formulaire. Un identifiant unique et un acte sécurisé seront générés automatiquement.
+  </div>
+
+  <!-- Section 1 : Enfant -->
+  <div class="fsec">
+    <div class="fsec__head"><div class="fsec__num">1</div><span class="fsec__title">Informations de l'enfant</span></div>
+    <div class="fsec__body">
+      <div class="field">
+        <label for="nom_enfant">Nom complet de l'enfant <span class="req">*</span></label>
+        <input type="text" id="nom_enfant" placeholder="Prénom et nom de famille" autocomplete="off" oninput="clearErr('nom_enfant')">
+        <div class="field__error" id="err-nom_enfant"></div>
+      </div>
+      <div class="field--row">
+        <div class="field">
+          <label for="date_naissance">Date de naissance <span class="req">*</span></label>
+          <input type="date" id="date_naissance" oninput="clearErr('date_naissance')">
+          <div class="field__error" id="err-date_naissance"></div>
+        </div>
+        <div class="field">
+          <label for="lieu_naissance">Préfecture <span class="req">*</span></label>
+          <select id="lieu_naissance" onchange="clearErr('lieu_naissance')">
+            <option value="">Sélectionner</option>
+            <option>Conakry</option><option>Kindia</option><option>Kankan</option>
+            <option>Nzérékoré</option><option>Labé</option><option>Mamou</option>
+            <option>Faranah</option><option>Boké</option><option>Coyah</option>
+            <option>Guékédou</option><option>Macenta</option><option>Kissidougou</option>
+            <option>Siguiri</option><option>Télimélé</option><option>Pita</option>
+            <option>Dalaba</option><option>Koundara</option><option>Gaoual</option>
+          </select>
+          <div class="field__error" id="err-lieu_naissance"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2 : Parents -->
+  <div class="fsec">
+    <div class="fsec__head"><div class="fsec__num">2</div><span class="fsec__title">Informations des parents</span></div>
+    <div class="fsec__body">
+      <div class="field">
+        <label for="nom_mere">Nom complet de la mère <span class="req">*</span></label>
+        <input type="text" id="nom_mere" placeholder="Prénom et nom de famille" autocomplete="off" oninput="clearErr('nom_mere')">
+        <div class="field__error" id="err-nom_mere"></div>
+      </div>
+      <div class="field">
+        <label for="nom_pere">Nom complet du père <span class="req">*</span></label>
+        <input type="text" id="nom_pere" placeholder="Prénom et nom de famille" autocomplete="off" oninput="clearErr('nom_pere')">
+        <div class="field__error" id="err-nom_pere"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 3 : Agent -->
+  <div class="fsec">
+    <div class="fsec__head"><div class="fsec__num">3</div><span class="fsec__title">Agent enregistreur</span></div>
+    <div class="fsec__body">
+      <div class="field">
+        <label for="nom_agent">Nom et qualité de l'agent <span class="req">*</span></label>
+        <input type="text" id="nom_agent" placeholder="Ex : Dr. Ibrahima Kouyaté, Infirmier d'État" autocomplete="off" oninput="clearErr('nom_agent')">
+        <div class="field__error" id="err-nom_agent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bouton principal -->
+  <button id="submit-btn" class="btn-primary" onclick="soumettre()">
+    Valider et générer l'acte de naissance
+  </button>
+
+  <!-- Blocs d'info -->
+  <div class="info-block amber">
+    <div class="info-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+        <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+      </svg>
+    </div>
+    <span>Les données seront synchronisées sur la blockchain Polygon dès que la connexion sera disponible.</span>
+  </div>
+
+  <div class="info-block">
+    <div class="info-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.8">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+    </div>
+    <span>Chaque acte est protégé par une <strong>empreinte cryptographique unique</strong>. Toute modification invalide l'acte automatiquement.</span>
+  </div>
+
+  <div class="counter" id="counter"></div>
+
+  <!-- Navigation -->
+  <div class="btn-grid">
+    <a href="verify.html" class="btn-outline">Vérifier un acte</a>
+    <a href="admin.html"  class="btn-outline">Administration</a>
+  </div>
+</main>
+
+<!-- Loading overlay -->
+<div class="loading" id="loading">
+  <div class="loading__box">
+    <div class="spinner"></div>
+    <p class="loading__title" id="loading-title">Traitement</p>
+    <small class="loading__sub"   id="loading-sub"></small>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT — PAGE ENREGISTREMENT UNIQUEMENT
+     Toute la logique est ici : validation, hachage, stockage.
+     ============================================================ -->
+<script>
+'use strict';
+
+/* ── Clés LocalStorage ── */
+const KEY_RECORDS = 'nc_birth_records';
+const KEY_LAST    = 'nc_last_id';
+
+/* ── Initialisation ── */
+document.getElementById('date_naissance').max = new Date().toISOString().split('T')[0];
+refreshCounter();
+
+/* ── Toast ── */
+function toast(msg, isErr = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast show' + (isErr ? ' err' : '');
+  clearTimeout(t._t);
+  t._t = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+/* ── Loading overlay ── */
+function setLoading(on, titre = '', sous = '') {
+  document.getElementById('loading').classList.toggle('show', on);
+  document.getElementById('loading-title').textContent = titre;
+  document.getElementById('loading-sub').textContent   = sous;
+}
+
+/* ── Effacer erreur champ ── */
+function clearErr(id) {
+  const el = document.getElementById(id);
+  const er = document.getElementById('err-' + id);
+  if (el) el.classList.remove('err');
+  if (er) er.classList.remove('show');
+}
+
+/* ── Compteur d'actes ── */
+function refreshCounter() {
+  const n  = getAll().length;
+  const el = document.getElementById('counter');
+  if (el) el.textContent = n > 0 ? `${n} acte${n > 1 ? 's' : ''} enregistré${n > 1 ? 's' : ''} dans ce registre local.` : '';
+}
+
+/* ── Stockage ── */
+function getAll() {
+  try { return JSON.parse(localStorage.getItem(KEY_RECORDS) || '[]'); } catch { return []; }
+}
+function sauvegarder(acte) {
+  const list = getAll();
+  if (list.find(r => r.id === acte.id)) throw new Error('Cet identifiant existe déjà.');
+  list.push(acte);
+  localStorage.setItem(KEY_RECORDS, JSON.stringify(list));
+  localStorage.setItem(KEY_LAST, acte.id);
+}
+
+/* ── SHA-256 (natif navigateur) ── */
+async function sha256(msg) {
+  const buf  = new TextEncoder().encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ── Hash canonique (clés triées = déterministe) ── */
+async function hasherActe(data) {
+  const canonical = JSON.stringify({
+    date_enregistrement: data.date_enregistrement,
+    date_naissance:      data.date_naissance,
+    id:                  data.id,
+    lieu_naissance:      data.lieu_naissance,
+    nom_agent:           data.nom_agent,
+    nom_enfant:          data.nom_enfant,
+    nom_mere:            data.nom_mere,
+    nom_pere:            data.nom_pere,
+  });
+  return { hashHex: await sha256(canonical), canonical };
+}
+
+/* ── Validation ── */
+const NAME_REGEX = /^[a-zA-ZÀ-ÿ\s'\-\.]{2,80}$/;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const PREFECTURES = ['Conakry','Kindia','Kankan','Nzérékoré','Labé','Mamou','Faranah','Boké','Coyah','Guékédou','Macenta','Kissidougou','Siguiri','Télimélé','Pita','Dalaba','Koundara','Gaoual'];
+
+function sanitize(s) {
+  return String(s).replace(/<[^>]*>/g,'').replace(/[<>"'`]/g,'').replace(/javascript:/gi,'').replace(/\s+/g,' ').trim();
+}
+function validerNom(v)  { const s=sanitize(v); if(!NAME_REGEX.test(s)) throw new Error('Nom invalide (2–80 lettres).'); return s; }
+function validerDate(v) {
+  if(!DATE_REGEX.test(v)) throw new Error('Date invalide.');
+  const d = new Date(v);
+  if(isNaN(d)) throw new Error('Date non reconnue.');
+  if(d > new Date()) throw new Error('Date dans le futur impossible.');
+  return v;
+}
+function validerLieu(v) { if(!PREFECTURES.includes(v)) throw new Error('Préfecture invalide.'); return v; }
+
+function validerFormulaire() {
+  const champs = [
+    { id:'nom_enfant',    fn: validerNom  },
+    { id:'date_naissance',fn: validerDate },
+    { id:'lieu_naissance',fn: validerLieu },
+    { id:'nom_mere',      fn: validerNom  },
+    { id:'nom_pere',      fn: validerNom  },
+    { id:'nom_agent',     fn: validerNom  },
+  ];
+  let ok = true;
+  for (const c of champs) {
+    const el = document.getElementById(c.id);
+    const er = document.getElementById('err-' + c.id);
+    try {
+      c.fn(el.value);
+      el.classList.remove('err');
+      er.classList.remove('show');
+    } catch(e) {
+      el.classList.add('err');
+      er.textContent = e.message;
+      er.classList.add('show');
+      ok = false;
+    }
+  }
+  return ok;
+}
+
+/* ── Simulation blockchain (remplacer par ethers.js en prod) ── */
+async function envoyerBlockchain(data) {
+  await new Promise(r => setTimeout(r, 600 + Math.random()*400));
+  const txHash = '0x' + Array.from({length:64},()=>Math.floor(Math.random()*16).toString(16)).join('');
+  return { txHash, blockNumber: 58000000 + Math.floor(Math.random()*100000), explorerUrl: 'https://mumbai.polygonscan.com/tx/'+txHash };
+}
+
+/* ── Anti-double-soumission ── */
+let enCours = false;
+
+/* ── FLUX PRINCIPAL ── */
+async function soumettre() {
+  if (enCours) { toast('Une transaction est déjà en cours.', true); return; }
+  if (!validerFormulaire()) { toast('Veuillez corriger les champs invalides.', true); return; }
+
+  enCours = true;
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+
+  try {
+    /* 1. Données brutes depuis le formulaire */
+    const raw = {
+      id:                  'GN-' + Date.now(),
+      nom_enfant:          document.getElementById('nom_enfant').value,
+      date_naissance:      document.getElementById('date_naissance').value,
+      lieu_naissance:      document.getElementById('lieu_naissance').value,
+      nom_mere:            document.getElementById('nom_mere').value,
+      nom_pere:            document.getElementById('nom_pere').value,
+      nom_agent:           document.getElementById('nom_agent').value,
+      date_enregistrement: new Date().toISOString(),
+    };
+
+    /* 2. Hachage SHA-256 */
+    setLoading(true, "Calcul de l'empreinte", 'SHA-256 en cours...');
+    const { hashHex } = await hasherActe(raw);
+    raw.hashHex = hashHex;
+    await new Promise(r => setTimeout(r, 200));
+
+    /* 3. Envoi blockchain */
+    setLoading(true, 'Enregistrement blockchain', 'Soumission de la transaction...');
+    const { txHash, blockNumber, explorerUrl } = await envoyerBlockchain(raw);
+    raw.txHash      = txHash;
+    raw.blockNumber = blockNumber;
+    raw.explorerUrl = explorerUrl;
+
+    /* 4. Sauvegarde locale */
+    sauvegarder(raw);
+    setLoading(false);
+
+    /* 5. Redirection vers le résultat */
+    window.location.href = 'resultat.html?id=' + raw.id;
+
+  } catch(e) {
+    setLoading(false);
+    toast(e.message || 'Une erreur est survenue.', true);
+  } finally {
+    btn.disabled = false;
+    enCours = false;
+  }
+}
+</script>
+</body>
+</html>

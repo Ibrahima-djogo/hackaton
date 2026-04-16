@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NaissanceChain — Vérification</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="verify.css">
+</head>
+<body>
+
+<div class="gov-strip"></div>
+
+<header class="header">
+  <div class="header__inner">
+    <a href="index.html" class="brand">
+      <div class="brand__seal"></div>
+      <div>
+        <span class="brand__name">NaissanceChain</span>
+        <span class="brand__sub">Registre Civil</span>
+      </div>
+    </a>
+    <a href="index.html" class="back-link">Retour</a>
+  </div>
+</header>
+
+<div class="banner">
+  <div class="banner__label">République de Guinée</div>
+  <h1>Vérification d'Acte</h1>
+  <p>Contrôle d'authenticité — 5 points cryptographiques</p>
+</div>
+
+<main class="main">
+
+  <!-- Formulaire de recherche -->
+  <div class="search-card">
+    <div class="card-head">Recherche par identifiant national</div>
+    <div class="card-body">
+      <div class="search-row">
+        <input type="search" id="search-input" class="search-input"
+          placeholder="GN-XXXXXXXXXXXXXXX"
+          autocomplete="off" autocorrect="off" spellcheck="false"
+          oninput="onInput(this.value)"
+          onkeydown="if(event.key==='Enter') verifier()">
+        <button class="search-btn" id="verify-btn" onclick="verifier()">Vérifier</button>
+      </div>
+      <p class="search-hint">Format : <code>GN-</code> suivi d'un identifiant numérique.</p>
+    </div>
+  </div>
+
+  <!-- Checklist 5 points (s'affiche pendant la vérification) -->
+  <div class="checklist" id="checklist">
+    <div class="checklist__title">Vérification en 5 points</div>
+    <div class="vc-item" id="vc-1"><div class="vc-icon" id="vi-1">—</div><span>Recherche dans le registre</span></div>
+    <div class="vc-item" id="vc-2"><div class="vc-icon" id="vi-2">—</div><span>Recalcul de l'empreinte cryptographique</span></div>
+    <div class="vc-item" id="vc-3"><div class="vc-icon" id="vi-3">—</div><span>Comparaison hash registre vs hash local</span></div>
+    <div class="vc-item" id="vc-4"><div class="vc-icon" id="vi-4">—</div><span>Vérification de la transaction on-chain</span></div>
+    <div class="vc-item" id="vc-5"><div class="vc-icon" id="vi-5">—</div><span>Validation de l'horodatage</span></div>
+  </div>
+
+  <!-- Zone de résultat -->
+  <div id="result-zone"></div>
+
+  <!-- Actes récents -->
+  <div class="recent-card">
+    <div class="card-head" style="padding:11px 17px;border-bottom:1px solid var(--border)">Actes récents dans ce registre</div>
+    <div id="recent-list"></div>
+  </div>
+
+  <div class="btn-grid">
+    <a href="index.html" class="btn-outline">Enregistrement</a>
+    <a href="admin.html" class="btn-outline">Administration</a>
+  </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT — PAGE VÉRIFICATION UNIQUEMENT
+     5 checks crypto, affichage résultat, liste récente.
+     ============================================================ -->
+<script>
+'use strict';
+
+const KEY_RECORDS = 'nc_birth_records';
+
+/* ── Utilitaires ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function formatDate(s) {
+  if (!s) return '—';
+  return new Date(s + 'T00:00:00').toLocaleDateString('fr-FR', { day:'numeric', month:'long', year:'numeric' });
+}
+
+function formatDateTime(s) {
+  if (!s) return '—';
+  const d = new Date(s);
+  return d.toLocaleDateString('fr-FR') + ' à ' + d.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+}
+
+function getAll() {
+  try { return JSON.parse(localStorage.getItem(KEY_RECORDS) || '[]'); } catch { return []; }
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ── SHA-256 (natif navigateur) ── */
+async function sha256(msg) {
+  const buf  = new TextEncoder().encode(msg);
+  const hash = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function hasherActe(data) {
+  const canonical = JSON.stringify({
+    date_enregistrement: data.date_enregistrement,
+    date_naissance:      data.date_naissance,
+    id:                  data.id,
+    lieu_naissance:      data.lieu_naissance,
+    nom_agent:           data.nom_agent,
+    nom_enfant:          data.nom_enfant,
+    nom_mere:            data.nom_mere,
+    nom_pere:            data.nom_pere,
+  });
+  return await sha256(canonical);
+}
+
+/* ── Gestion checklist ── */
+function setCheck(n, state) {
+  const item = document.getElementById('vc-' + n);
+  const icon = document.getElementById('vi-' + n);
+  item.className = 'vc-item ' + state;
+  icon.textContent = state==='checking' ? '↻' : state==='pass' ? '✓' : state==='fail' ? '✗' : '—';
+}
+
+function resetChecklist() {
+  for (let i=1; i<=5; i++) setCheck(i, 'pending');
+}
+
+/* ── Icône check SVG ── */
+function checkSvg(pass) {
+  return pass
+    ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>`
+    : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>`;
+}
+
+/* ── VÉRIFICATION PRINCIPALE ── */
+async function verifier() {
+  const id  = document.getElementById('search-input').value.trim();
+  const zone = document.getElementById('result-zone');
+
+  if (!id) { toast('Veuillez saisir un identifiant.', true); return; }
+  if (!id.match(/^GN-\d{10,}/)) { toast('Format invalide. Attendu : GN-XXXXXXXXXX', true); return; }
+
+  const btn = document.getElementById('verify-btn');
+  btn.disabled = true;
+  btn.textContent = 'Vérification...';
+  zone.innerHTML = '';
+  document.getElementById('checklist').classList.add('show');
+  resetChecklist();
+
+  const checks = { c1:false, c2:false, c3:false, c4:false, c5:false };
+  let acte = null;
+  let hashRecalcule = null;
+
+  try {
+    /* CHECK 1 — Existence dans le registre */
+    setCheck(1,'checking'); await sleep(350);
+    acte = getAll().find(r => r.id === id) || null;
+    checks.c1 = !!acte;
+    setCheck(1, checks.c1 ? 'pass' : 'fail');
+
+    /* CHECK 2 — Recalcul du hash */
+    setCheck(2,'checking'); await sleep(300);
+    if (acte) {
+      try { hashRecalcule = await hasherActe(acte); checks.c2 = true; }
+      catch { checks.c2 = false; }
+    }
+    setCheck(2, checks.c2 ? 'pass' : 'fail');
+
+    /* CHECK 3 — Comparaison des hash */
+    setCheck(3,'checking'); await sleep(300);
+    if (acte && hashRecalcule) {
+      checks.c3 = (acte.hashHex === hashRecalcule);
+    }
+    setCheck(3, checks.c3 ? 'pass' : 'fail');
+
+    /* CHECK 4 — Transaction on-chain (simulation) */
+    setCheck(4,'checking'); await sleep(450);
+    if (acte) { checks.c4 = !!acte.txHash; }
+    setCheck(4, checks.c4 ? 'pass' : 'fail');
+
+    /* CHECK 5 — Horodatage */
+    setCheck(5,'checking'); await sleep(300);
+    if (acte && acte.date_enregistrement) {
+      const ts = new Date(acte.date_enregistrement).getTime();
+      checks.c5 = ts > 0 && ts <= Date.now();
+    }
+    setCheck(5, checks.c5 ? 'pass' : 'fail');
+
+  } catch(e) {
+    toast('Erreur : ' + e.message, true);
+  }
+
+  const passCount = Object.values(checks).filter(Boolean).length;
+  const isValid   = checks.c1 && checks.c3 && passCount >= 4;
+
+  afficherResultat(id, isValid, checks, acte, hashRecalcule);
+
+  btn.disabled = false;
+  btn.textContent = 'Vérifier';
+}
+
+/* ── Affichage du résultat ── */
+function afficherResultat(id, isValid, checks, acte, hash) {
+  const zone = document.getElementById('result-zone');
+  const labels = [
+    'Enregistrement trouvé dans le registre',
+    'Empreinte cryptographique recalculée',
+    'Hash registre = Hash local (intégrité)',
+    'Transaction on-chain confirmée',
+    'Horodatage valide',
+  ];
+
+  if (isValid && acte) {
+    zone.innerHTML = `
+      <div class="result-zone">
+        <div class="result-head valid">
+          <div>
+            <h3>Acte Valide — Confirmé</h3>
+            <p>${Object.values(checks).filter(Boolean).length}/5 points validés</p>
+          </div>
+          <div class="result-head__icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="res-grid">
+            <div class="res-row"><div><div class="res-lbl">Nom de l'enfant</div><div class="res-val">${acte.nom_enfant}</div></div></div>
+            <div class="res-row"><div><div class="res-lbl">Date de naissance</div><div class="res-val">${formatDate(acte.date_naissance)}</div></div></div>
+            <div class="res-row"><div><div class="res-lbl">Lieu</div><div class="res-val">${acte.lieu_naissance}, Guinée</div></div></div>
+            <div class="res-row"><div><div class="res-lbl">Mère</div><div class="res-val">${acte.nom_mere}</div></div></div>
+            <div class="res-row"><div><div class="res-lbl">Père</div><div class="res-val">${acte.nom_pere}</div></div></div>
+            <div class="res-row"><div><div class="res-lbl">Enregistré le</div><div class="res-val">${formatDateTime(acte.date_enregistrement)}</div></div></div>
+          </div>
+          <div class="hash-box">
+            <div class="hash-box__lbl">Résultats cryptographiques</div>
+            <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+              ${Object.values(checks).map((p,i) => `<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:${p?'rgba(46,204,113,.85)':'#EF4444'}">${checkSvg(p)} ${labels[i]}</div>`).join('')}
+            </div>
+          </div>
+          <div class="hash-box">
+            <div class="hash-box__lbl">Empreinte SHA-256</div>
+            <div class="hash-box__val">${hash || acte.hashHex}</div>
+          </div>
+          <div class="stamp">
+            <div class="stamp__icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="stamp__text">Acte valide et sécurisé</div>
+              <div class="stamp__sub">Vérifié cryptographiquement par NaissanceChain</div>
+            </div>
+          </div>
+          <a href="resultat.html?id=${acte.id}" class="btn-primary">Consulter l'acte complet</a>
+        </div>
+      </div>`;
+  } else {
+    zone.innerHTML = `
+      <div class="result-zone">
+        <div class="result-head invalid">
+          <div>
+            <h3>Acte Non Valide</h3>
+            <p>Vérification échouée sur ${5 - Object.values(checks).filter(Boolean).length} point(s).</p>
+          </div>
+          <div class="result-head__icon">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </div>
+        </div>
+        <div class="result-body">
+          ${Object.values(checks).map((p,i) => `
+            <div class="inv-check ${p?'pass':'fail'}">${checkSvg(p)} ${labels[i]} — ${p?'Validé':'Échec'}</div>
+          `).join('')}
+          <p style="font-size:12px;color:var(--slate);text-align:center;margin-top:10px">
+            Identifiant recherché : <span style="font-family:var(--mono)">${id}</span>
+          </p>
+        </div>
+      </div>`;
+  }
+}
+
+/* ── Vider résultat si champ effacé ── */
+function onInput(val) {
+  if (!val.trim()) {
+    document.getElementById('result-zone').innerHTML = '';
+    document.getElementById('checklist').classList.remove('show');
+  }
+}
+
+/* ── Actes récents ── */
+function chargerRecents() {
+  const list = getAll();
+  const el   = document.getElementById('recent-list');
+  if (!list.length) {
+    el.innerHTML = '<div class="recent-item__empty">Aucun acte enregistré sur cet appareil.</div>';
+    return;
+  }
+  el.innerHTML = [...list].reverse().slice(0,6).map(r => `
+    <div class="recent-item" onclick="selectionner('${r.id}')">
+      <div>
+        <div class="recent-item__name">${r.nom_enfant}</div>
+        <div class="recent-item__id">${r.id}</div>
+        ${r.txHash ? '<div class="recent-item__chain">Confirmé</div>' : ''}
+      </div>
+      <span style="color:var(--sl2);font-size:16px">›</span>
+    </div>
+  `).join('');
+}
+
+function selectionner(id) {
+  document.getElementById('search-input').value = id;
+  verifier();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ── Initialisation ── */
+chargerRecents();
+const urlId = new URLSearchParams(window.location.search).get('id');
+if (urlId) { document.getElementById('search-input').value = urlId; verifier(); }
+</script>
+</body>
+</html>
