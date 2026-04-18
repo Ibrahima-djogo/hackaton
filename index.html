@@ -19,7 +19,7 @@
 <nav class="nav" id="nav">
   <div class="nav__inner">
     <a href="#hero" class="nav__brand">
-      <div class="nav__seal"></div>
+      <img src="logo.jpg" alt="NaissanceChain Logo" class="nav__logo">
       <div>
         <span class="nav__name">NaissanceChain</span>
         <span class="nav__sub">Registre Civil Numérique</span>
@@ -30,7 +30,7 @@
       <a href="#solution"  class="nav__link">Solution</a>
       <a href="#processus" class="nav__link">Processus</a>
       <a href="#impact"    class="nav__link">Impact</a>
-      <a href="indexapp.html" class="nav__link nav__cta">Accéder au registre</a>
+      <a href="#" class="nav__link nav__cta" onclick="openLoginModal(event)">Accéder au registre</a>
     </div>
   </div>
 </nav>
@@ -53,7 +53,7 @@
         <h1 class="hero__title">Naissance<em>Chain</em></h1>
         <p class="hero__desc">Système numérique d'enregistrement des naissances — sécurisé, fonctionnel sans connexion internet, accessible à tous les agents de santé en Guinée.</p>
         <div class="hero__btns">
-          <a href="indexapp.html" class="btn-gold">Enregistrer une naissance</a>
+          <a href="#" class="btn-gold" onclick="openLoginModal(event)">Enregistrer une naissance</a>
           <a href="#probleme" class="btn-ghost">En savoir plus</a>
         </div>
       </div>
@@ -218,7 +218,7 @@
     <h2>Prêt à enregistrer<br>une naissance ?</h2>
     <p>Gratuit. Sécurisé. Disponible sans connexion.</p>
     <div class="cta__btns">
-      <a href="indexapp.html" class="btn-gold">Enregistrer une naissance</a>
+      <a href="#" class="btn-gold" onclick="openLoginModal(event)">Enregistrer une naissance</a>
       <a href="verify.html" class="btn-ghost">Vérifier un acte</a>
     </div>
   </div>
@@ -229,7 +229,10 @@
   <div class="footer__inner">
     <div class="footer__grid">
       <div>
-        <div class="footer__brand-name"><div class="footer__seal"></div>NaissanceChain</div>
+        <div class="footer__brand-name">
+          <img src="logo.jpg" alt="Logo" class="footer__logo">
+          NaissanceChain
+        </div>
         <p class="footer__desc">Système numérique d'enregistrement des naissances pour la République de Guinée.</p>
         <div class="footer__flag">
           <span style="background:#CE1126"></span>
@@ -240,7 +243,7 @@
       <div class="footer__col">
         <h4>Application</h4>
         <ul>
-          <li><a href="indexapp.html">Enregistrement</a></li>
+          <li><a href="#" onclick="openLoginModal(event)">Enregistrement</a></li>
           <li><a href="verify.html">Vérification</a></li>
           <li><a href="admin.html">Administration</a></li>
         </ul>
@@ -263,11 +266,48 @@
   </div>
 </footer>
 
-<!-- ============================================================
-     JAVASCRIPT — SITE VITRINE UNIQUEMENT
-     Animations scroll. Aucune logique métier ici.
-     ============================================================ -->
+<!-- ══ MODAL DE CONNEXION ══ -->
+<div id="login-modal" class="modal">
+  <div class="modal__overlay" onclick="closeLoginModal()"></div>
+  <div class="modal__content">
+    <div class="modal__close" onclick="closeLoginModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </div>
+    <div class="modal__header">
+      <img src="logo.jpg" alt="Logo" class="modal__logo">
+      <h3 class="modal__title">Portail Agent</h3>
+      <p class="modal__sub">République de Guinée</p>
+      <p class="modal__lead">Veuillez vous identifier pour accéder au registre de l'état civil.</p>
+    </div>
+    <div id="m-err" class="m-err">Matricule non reconnu.</div>
+    <form id="m-form">
+      <div class="m-field">
+        <label for="m-code">Matricule Officiel</label>
+        <input type="text" id="m-code" placeholder="Ex: GN-AGENT-2025" required autocomplete="off">
+      </div>
+      <button type="submit" class="m-btn">Se connecter au registre</button>
+    </form>
+  </div>
+</div>
+
 <script>
+  /* Logic du Modal */
+  function openLoginModal(e) { e.preventDefault(); document.getElementById('login-modal').classList.add('show'); }
+  function closeLoginModal() { document.getElementById('login-modal').classList.remove('show'); }
+
+  document.getElementById('m-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const code = document.getElementById('m-code').value.trim().toUpperCase();
+    if (code === 'GN-AGENT-2025') {
+      sessionStorage.setItem('nc_agent_auth', 'true');
+      window.location.href = 'indexapp.html';
+    } else {
+      const err = document.getElementById('m-err');
+      err.style.display = 'block';
+      setTimeout(() => { err.style.display = 'none'; }, 3000);
+    }
+  });
+
   /* Animation des éléments au scroll */
   const observer = new IntersectionObserver(
     entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),

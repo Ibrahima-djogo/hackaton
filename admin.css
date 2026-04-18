@@ -32,8 +32,7 @@
     .topbar { background: var(--navy); border-bottom: 1px solid rgba(255,255,255,.07); padding: 0 20px; }
     .topbar__inner { max-width: 1000px; margin: 0 auto; height: 56px; display: flex; align-items: center; justify-content: space-between; }
     .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .brand__seal { width: 32px; height: 32px; background: rgba(255,255,255,.08); border-radius: 50%; border: 1px solid rgba(255,255,255,.15); position: relative; flex-shrink: 0; }
-    .brand__seal::after { content: ''; position: absolute; width: 11px; height: 11px; background: var(--gold); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+    .brand__logo { height: 32px; width: auto; object-fit: contain; }
     .brand__name { font-family: var(--serif); font-size: 17px; font-weight: 700; color: white; display: block; line-height: 1; }
     .brand__sub  { font-size: 9px; color: rgba(255,255,255,.4); letter-spacing: .09em; text-transform: uppercase; display: block; margin-top: 2px; }
     .admin-badge { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); background: rgba(184,146,42,.12); border: 1px solid rgba(184,146,42,.3); padding: 4px 12px; border-radius: 2px; }
