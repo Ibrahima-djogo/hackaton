@@ -126,3 +126,33 @@
     /* ── Toast ── */
     .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--navy); color: white; padding: 12px 22px; font-size: 13px; font-weight: 500; transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 9999; border-left: 3px solid var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,.5); border-radius: 2px; max-width: 90vw; text-align: center; line-height: 1.4; }
     .toast.show { transform: translateX(-50%) translateY(0); }
+    /* ── Responsive Admin ── */
+    @media (max-width: 900px) {
+      .topbar__inner { height: 64px; }
+      .brand__name { font-size: 15px; }
+      .brand__logo { height: 28px; }
+      .admin-badge { display: none; }
+      
+      .content { padding: 16px 14px 40px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      
+      .tabs { 
+        overflow-x: auto; 
+        -webkit-overflow-scrolling: touch; 
+        scrollbar-width: none; 
+        padding-bottom: 0;
+      }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab { white-space: nowrap; padding: 12px 14px; flex-shrink: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-card__val { font-size: 24px; }
+      
+      .block__head { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .audit-table th, .audit-table td { padding: 10px 8px; font-size: 10px; }
+      .td-name { font-size: 11px; }
+      
+      .bar-name { width: 60px; font-size: 9px; }
+    }

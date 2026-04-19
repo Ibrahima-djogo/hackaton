@@ -110,8 +110,26 @@
     .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--navy); color: white; padding: 12px 22px; font-size: 13px; font-weight: 500; transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 9999; border-left: 3px solid var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,.25); border-radius: 2px; }
     .toast.show { transform: translateX(-50%) translateY(0); }
 
+    @media (max-width: 660px) {
+      .header__inner { height: 62px; }
+      .brand__name { font-size: 15px; }
+      .brand__logo { height: 28px; }
+      .valid-badge { font-size: 9px; padding: 4px 10px; }
+      
+      .main { padding: 16px 14px 40px; }
+      .cert-title { font-size: 18px; }
+      .cert-country { font-size: 8px; }
+      .cert-ministry { font-size: 8px; }
+      
+      .name-value { font-size: 20px; }
+      .data-val { font-size: 12px; }
+      .data-lbl { font-size: 8px; }
+      
+      .crypto-hash { font-size: 9px; }
+      .btn-grid { grid-template-columns: 1fr; }
+    }
+
     @media print {
       .header, .gov-strip, .success-bar, .actions, .print-hint { display: none !important; }
       body { background: white; }
     }
-    @media (max-width: 480px) { .btn-grid { grid-template-columns: 1fr; } }

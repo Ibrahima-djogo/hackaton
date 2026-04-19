@@ -131,3 +131,22 @@
     /* Toast */
     .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--navy); color: white; padding: 12px 22px; font-size: 13px; font-weight: 500; transition: transform .35s cubic-bezier(.34,1.56,.64,1); z-index: 9999; border-left: 3px solid var(--gold); box-shadow: 0 8px 30px rgba(0,0,0,.25); border-radius: 2px; max-width: 90vw; text-align: center; line-height: 1.4; }
     .toast.show { transform: translateX(-50%) translateY(0); }
+    /* ── Responsive Verify ── */
+    @media (max-width: 660px) {
+      .header__inner { height: 62px; }
+      .brand__name { font-size: 15px; }
+      .brand__logo { height: 28px; }
+      .back-link { font-size: 10px; }
+      
+      .banner { padding: 32px 20px; }
+      .banner h1 { font-size: 20px; }
+      
+      .main { padding: 16px 14px 40px; }
+      .search-row { flex-direction: column; gap: 8px; }
+      .search-btn { width: 100%; }
+      .btn-grid { grid-template-columns: 1fr; }
+      
+      .result-head { padding: 14px; }
+      .result-head h3 { font-size: 12px; }
+      .result-head__icon { width: 30px; height: 30px; }
+    }

@@ -32,8 +32,37 @@
       <a href="#impact"    class="nav__link">Impact</a>
       <a href="#" class="nav__link nav__cta" onclick="openLoginModal(event)">Accéder au registre</a>
     </div>
+    <button class="nav__hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </nav>
+
+<!-- ══ MOBILE MENU ══ -->
+<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu__overlay" onclick="toggleMobileMenu()"></div>
+  <div class="mobile-menu__content">
+    <div class="mobile-menu__header">
+      <div class="nav__brand">
+        <img src="logo.jpg" alt="Logo" class="nav__logo" style="height:32px">
+        <span class="nav__name">NaissanceChain</span>
+      </div>
+      <button class="mobile-menu__close" onclick="toggleMobileMenu()">&times;</button>
+    </div>
+    <div class="mobile-menu__links">
+      <a href="#probleme" class="m-link" onclick="toggleMobileMenu()">Le problème</a>
+      <a href="#solution" class="m-link" onclick="toggleMobileMenu()">Solution</a>
+      <a href="#processus" class="m-link" onclick="toggleMobileMenu()">Processus</a>
+      <a href="#impact" class="m-link" onclick="toggleMobileMenu()">Impact</a>
+      <div class="m-divider"></div>
+      <a href="#" class="m-link m-cta" onclick="toggleMobileMenu(); openLoginModal(event)">Accéder au registre</a>
+    </div>
+    <div class="mobile-menu__footer">
+      <p>République de Guinée</p>
+      <span>Registre Civil Numérique</span>
+    </div>
+  </div>
+</div>
 
 <!-- ══ HERO ══ -->
 <section id="hero" style="padding:0">
@@ -291,6 +320,12 @@
 </div>
 
 <script>
+  /* Menu Mobile */
+  function toggleMobileMenu() {
+    document.getElementById('mobile-menu').classList.toggle('active');
+    document.body.style.overflow = document.getElementById('mobile-menu').classList.contains('active') ? 'hidden' : '';
+  }
+
   /* Logic du Modal */
   function openLoginModal(e) { e.preventDefault(); document.getElementById('login-modal').classList.add('show'); }
   function closeLoginModal() { document.getElementById('login-modal').classList.remove('show'); }

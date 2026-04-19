@@ -81,4 +81,20 @@ body{font-family:var(--sans);background:var(--cream);color:var(--text);min-heigh
 .toast.err{border-left-color:#EF4444}
 .counter{text-align:center;font-size:11px;color:var(--sl2);margin-top:16px}
 
-@media(max-width:480px){.field--row{grid-template-columns:1fr}.btn-grid{grid-template-columns:1fr}.main{padding:16px 16px 50px}}
+    @media (max-width: 600px) {
+      .hdr__in { height: 62px; }
+      .brand__name { font-size: 15px; }
+      .brand__logo { height: 28px; }
+      .pill { display: none; }
+      
+      .banner { padding: 32px 20px; }
+      .banner h1 { font-size: 20px; }
+      
+      .main { padding: 16px 14px 40px; }
+      .field--row { grid-template-columns: 1fr; gap: 4px; }
+      .btn-grid { grid-template-columns: 1fr; }
+      
+      .fsec__head { padding: 10px 14px; }
+      .fsec__num { width: 18px; height: 18px; font-size: 9px; }
+      .fsec__title { font-size: 10px; }
+    }
